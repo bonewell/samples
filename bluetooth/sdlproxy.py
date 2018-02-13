@@ -2,10 +2,10 @@
 
 import bluetooth
 
-host = '00:1f:e1:dd:08:3d'
+host = '00:1b:dc:06:d8:37'
 #host = ""
-port = 3
-#port = bluetooth.PORT_ANY
+#port = 9
+port = bluetooth.PORT_ANY
 
 backlog = 1
 size = 1024
@@ -15,22 +15,28 @@ s.listen(backlog)
 
 #port = server_sock.getsockname()[1]
 
-uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
+#uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
+uuid = "936da01f-9abd-4d9d-80c7-02af85c822a8"
 
-bluetooth.advertise_service(s, "SampleServer",
+bluetooth.advertise_service(s, "SdlProxy",
     service_id = uuid,
-    service_classes = [ uuid, bluetooth.SERIAL_PORT_CLASS ],
-    profiles = [ bluetooth.SERIAL_PORT_PROFILE ],
+    service_classes = [ uuid ],
+#    profiles = [ bluetooth.SERIAL_PORT_PROFILE,
+#                 bluetooth.HEADSET_AGW_PROFILE,
+#                 bluetooth.HANDSFREE_AGW_PROFILE ],
 #    protocols = [ bluetooth.OBEX_UUID ] 
 )
+
 try:
     client, clientInfo = s.accept()
+    print("Connection is accepted")
     while 1:
         data = client.recv(size)
         if data:
             print(data)
             client.send(data)
-except:
+except Exception as error:
+    print(error)
     print("Closing socket")
     client.close()
     s.close()
