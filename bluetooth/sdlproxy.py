@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
 import bluetooth
+import asyncore
+from routing import route
+from routing import connection
+from routing import bluetooth_connection
 
 host = '00:1b:dc:06:d8:37'
 #host = ""
@@ -30,11 +34,11 @@ bluetooth.advertise_service(s, "SdlProxy",
 try:
     client, clientInfo = s.accept()
     print("Connection is accepted")
-    while 1:
-        data = client.recv(size)
-        if data:
-            print(data)
-            client.send(data)
+    sdl = bluetooth_connection.create(client)
+    app = connection.create('127.0.0.1', '98765')
+    route.create(app, sdl)
+    app.open()
+    asyncore.loop()
 except Exception as error:
     print(error)
     print("Closing socket")
