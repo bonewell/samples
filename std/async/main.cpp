@@ -10,15 +10,15 @@ int iterate(int x, int y)
         cout << ".";
         cout.flush();
         this_thread::sleep_for(1s);
-        this_thread::yield i;
+        this_thread::yield();
     }
-    return y;
+    return 5;
 }
 
 int main()
 {
     cout << "Id: " << this_thread::get_id() << endl;
-    future<bool> f = async(iterate, 0, 5);
+    auto f = async(iterate, 0, 5);
 
     cout << f.get() << endl;
     this_thread::sleep_for(10s);
