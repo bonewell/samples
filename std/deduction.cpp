@@ -1,4 +1,5 @@
 #include <iostream>
+#include <typeinfo>
 
 using namespace std;
 
@@ -30,7 +31,7 @@ private:
 int main() {
   Optional o1{4.5}; // C++17 is required for deduction
   if (o1) {
-    cout << "o1=" << *o1 << "\n";
+    cout << "o1=" << *o1 << ",type=" << typeid(*o1).name() << "\n";
   } else {
     cout << "o1 is not presented\n";
   }
@@ -41,5 +42,11 @@ int main() {
   }
   o2 = 7;
   if (o2)
-    cout << "o1=" << *o2 << "\n";
+    cout << "o1=" << *o2 << ",type=" << typeid(*o2).name() << "\n";
+
+  Optional o3 = "abc";
+  if (o3) cout << "o3=" << *o3 << ",type=" << typeid(*o3).name() << "\n";
+
+  Optional o4 = "abc"s;
+  cout << "o4=" << *o4 << ",type=" << typeid(*o4).name() << "\n";
 }
