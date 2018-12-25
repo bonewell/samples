@@ -18,7 +18,7 @@ int main() {
   for (auto i=0; i != 10000000; ++i) v.push_back(value());
 
   auto start = chrono::system_clock::now();
-  sort(execution::seq, begin(v), end(v));
+  sort(execution::par, begin(v), end(v));
   auto end = chrono::system_clock::now();
 
   chrono::duration<double> elapsed_seconds = end - start;
