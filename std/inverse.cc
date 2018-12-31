@@ -1,13 +1,17 @@
 #include <iostream>
+#include <bitset>
+
+using namespace std;
+
+constexpr auto length = sizeof(char) * 8;
+using bs = bitset<length>;
 
 int main() {
-  unsigned char v = 2;
-  unsigned char nv = 1;
+  unsigned char v = 3;
   unsigned char iv = ~v;
-  unsigned char niv = ~nv;
-//  bool b = iv == (~v);
-  bool b = iv == niv;
-  std::cout << std::boolalpha << b << std::endl;
-  std::cout << std::hex << v << " " << iv << " " << niv << std::endl;
-  return 0;
+  cout << int(v) << ": " << bs(v) << ", " << int(iv) << ": " << bs(iv) << "\n";
+
+  char nv = -3;
+  char niv = ~nv;
+  cout << int(nv) << ": " << bs(nv) << ", " << int(niv) << ": " << bs(niv) << "\n";
 }
