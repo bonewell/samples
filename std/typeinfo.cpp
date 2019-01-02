@@ -14,9 +14,17 @@ public:
   }
 };
 
+void do_this(const A& a) {
+  std::cout << "do_this type=" << typeid(a).name() << "\n";
+}
+
 int main() {
-  auto b = B();
+  B b;
   A& a = b;
   std::cout << "type=" << typeid(a).name() << std::endl;
+  
+  do_this(b);
+  do_this(a);
+
   return 0;
 }
