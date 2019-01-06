@@ -17,7 +17,7 @@ struct B {
       return {x};
     }
     
-    explicit operator span<byte>() {
+    explicit operator span<byte>() {  // std::byte is c++17
         cout << "B::operator byte()\n";
         auto bs = span(reinterpret_cast<byte*>(&x), sizeof(x));
         reverse(begin(bs), end(bs));
