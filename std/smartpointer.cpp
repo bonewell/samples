@@ -14,6 +14,10 @@ class SmartPointer {
   enable_if_t<is_class_v<T>,T*> operator->() {
     return v_;
   }
+//   T* operator->() {
+//     static_assert(is_class_v<T>, "T should be class");
+//     return v_;
+//   }
 };
 
 struct A {
@@ -33,4 +37,5 @@ int main() {
   cout << sizeof(nullptr) << "\n";
 
   // SmartPointer i{new int(3)};  // not build
+  // i.operator->(); static_assert fails
 }
