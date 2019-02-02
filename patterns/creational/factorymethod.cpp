@@ -7,13 +7,13 @@ class Item {
         Item(const std::string& name): name_{name}
         {
         }
-        
-        void poweron()
+
+        virtual void poweron()
         {
             std::cout << "poweron\n";
         }
-        
-        void shutdown()
+
+        virtual void shutdown()
         {
             std::cout << "shutdown\n";
         }
@@ -47,7 +47,7 @@ class LaptopFactory: public Factory {
         Product create(const std::string& name) const override
         {
             std::cout << "Create laptor " << name << "\n";
-            return Product{new Laptop{name}};
+            return std::make_unique<Laptop>(name);
         }
 };
 
@@ -63,7 +63,7 @@ class VehicleFactory: public Factory {
         Product create(const std::string& name) const override
         {
             std::cout << "Create vehicle " << name << "\n";
-            return Product{new Vehicle{name}};
+            return std::make_unique<Vehicle>(name);
         }
 };
 

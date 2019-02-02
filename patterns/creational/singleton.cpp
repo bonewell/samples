@@ -4,7 +4,6 @@
 #include <ctime>
 #include <thread>
 
-using namespace std;
 using namespace std::chrono;
 
 class Time {
@@ -13,14 +12,14 @@ class Time {
             static Time time;
             return time;
         }
-        string get() {
+        std::string get() {
             auto time = system_clock::to_time_t(system_clock::now());
-            return string{ctime(&time)};
+            return std::string{ctime(&time)};
         }
 };
 
 int main() {
-    cout << Time::instance().get() << "\n";
-    this_thread::sleep_for(seconds(2));
-    cout << Time::instance().get() << "\n";
+    std::cout << Time::instance().get() << "\n";
+    std::this_thread::sleep_for(seconds(2));
+    std::cout << Time::instance().get() << "\n";
 }

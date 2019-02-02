@@ -1,22 +1,30 @@
 #include <memory>
 #include <iostream>
 
-class Device {
+class Phone {
     public:
         [[nodiscard]] virtual bool lock() noexcept = 0;
         [[nodiscard]] virtual bool unlock() = 0;
-        virtual ~Device() = default;
+        virtual ~Phone() = default;
 };
-using MobileDevice = std::unique_ptr<Device>;
+using PhonePtr = std::unique_ptr<Phone>;
+
+class Tablet {
+    public:
+        [[nodiscard]] virtual bool lock() noexcept = 0;
+        [[nodiscard]] virtual bool unlock() = 0;
+        virtual ~Tablet() = default;
+};
+using TabletPtr = std::unique_ptr<Tablet>;
 
 class Factory {
     public:
-        virtual MobileDevice phone() const = 0;
-        virtual MobileDevice tablet() const = 0;
+        virtual PhonePtr phone() const = 0;
+        virtual TabletPtr tablet() const = 0;
         virtual ~Factory() = default;
 };
 
-class iPhone: public Device {
+class iPhone: public Phone {
     public:
         [[nodiscard]]
         bool lock() noexcept override
@@ -24,7 +32,7 @@ class iPhone: public Device {
             std::cout << "iPhone: locked\n";
             return true;
         }
-    
+
         [[nodiscard]]
         bool unlock() override
         {
@@ -33,7 +41,7 @@ class iPhone: public Device {
         }
 };
 
-class iPad: public Device {
+class iPad: public Tablet {
     public:
         [[nodiscard]]
         bool lock() noexcept override
@@ -41,7 +49,7 @@ class iPad: public Device {
             std::cout << "iPad: locked\n";
             return true;
         }
-    
+
         [[nodiscard]]
         bool unlock() override
         {
@@ -50,7 +58,7 @@ class iPad: public Device {
         }
 };
 
-class Galaxy: public Device {
+class Galaxy: public Phone {
     public:
         [[nodiscard]]
         bool lock() noexcept override
@@ -58,7 +66,7 @@ class Galaxy: public Device {
             std::cout << "Galaxy: locked.\n";
             return true;
         }
-    
+
         [[nodiscard]]
         bool unlock() override
         {
@@ -67,7 +75,7 @@ class Galaxy: public Device {
         }
 };
 
-class MediaPad: public Device {
+class MediaPad: public Tablet {
     public:
         [[nodiscard]]
         bool lock() noexcept override
@@ -75,7 +83,7 @@ class MediaPad: public Device {
             std::cout << "MediaPad: locked.\n";
             return true;
         }
-    
+
         [[nodiscard]]
         bool unlock() override
         {
@@ -86,31 +94,31 @@ class MediaPad: public Device {
 
 class Apple: public Factory {
     public:
-        MobileDevice phone() const override
+        PhonePtr phone() const override
         {
             std::cout << "Create iPhone\n";
-            return MobileDevice{new iPhone{}};
+            return std::make_unique<iPhone>();
         }
 
-        MobileDevice tablet() const override
+        TabletPtr tablet() const override
         {
             std::cout << "Create iPad\n";
-            return MobileDevice{new iPad{}};
+            return std::make_unique<iPad>();
         }
 };
 
 class NoName: public Factory {
     public:
-        MobileDevice phone() const override
+        PhonePtr phone() const override
         {
             std::cout << "Create Galaxy\n";
-            return MobileDevice{new Galaxy{}};
+            return std::make_unique<Galaxy>();
         }
 
-        MobileDevice tablet() const override
+        TabletPtr tablet() const override
         {
             std::cout << "Create MediaPad\n";
-            return MobileDevice{new MediaPad{}};
+            return std::make_unique<MediaPad>();
         }
 };
 

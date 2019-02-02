@@ -1,88 +1,101 @@
 #include <string>
 #include <iostream>
-
-struct HomeTheater {
-    std::string screen;
-    std::string player;
-    std::string sound;
-};
+#include <memory>
 
 class Builder {
     public:
-        virtual void setScreen(std::string name) = 0;
-        virtual void setSound(std::string name) = 0;
+        virtual void setScreen(double size) = 0;
+        virtual void setSound(int power) = 0;
         virtual void setPlayer(std::string name) = 0;
-        HomeTheater get()
-        {
-            return ht_;
-        }
-    protected:
-        HomeTheater ht_;
 };
 
-class Setter {
+struct Cinema {
+    double screen;
+    std::string projector;
+    int sound;
+};
+
+class CinemaBuilder: public Builder {
     public:
-        Setter(std::shared_ptr<Builder> b): b_{b}
+        void setScreen(double size) override
         {
+            std::cout << "Set screen: " << size << "\n";
+            cinema_.screen = size;
         }
 
-        HomeTheater create(std::string screen,
-                           std::string sound,
-                           std::string player)
+        void setSound(int power) override
         {
-            b_->setScreen(screen);
-            b_->setSound(sound);
-            b_->setPlayer(player);
-            return b_->get();
+            std::cout << "Set sound: " << power << "\n";
+            cinema_.sound = power;
+        }
+
+        void setPlayer(std::string name) override
+        {
+            std::cout << "Set player: " << name << "\n";
+            cinema_.projector = std::move(name);
+        }
+
+        Cinema get()
+        {
+            return cinema_;
+        }
+    private:
+        Cinema cinema_;
+};
+
+struct Blueprint {
+    double screen;
+    std::string projector;
+    int sound;
+};
+
+class BlueprintBuilder: public Builder {
+    public:
+        void setScreen(double size) override
+        {
+            std::cout << "Draw screen: " << size << "\n";
+            blueprint_.screen = size;
+        }
+
+        void setSound(int power) override
+        {
+            std::cout << "Draw sound: " << power << "\n";
+            blueprint_.sound = power;
+        }
+
+        void setPlayer(std::string name) override
+        {
+            std::cout << "Draw player: " << name << "\n";
+            blueprint_.projector = std::move(name);
+        }
+
+        Blueprint get()
+        {
+            return blueprint_;
+        }
+    private:
+        Blueprint blueprint_;
+};
+
+class Director {
+    public:
+        Director(std::shared_ptr<Builder> b): b_{b} {}
+        void make()
+        {
+            b_->setScreen(40);
+            b_->setSound(1000);
+            b_->setPlayer("SONY");
         }
     private:
         std::shared_ptr<Builder> b_;
 };
 
-class HiFiBuilder: public Builder {
-    public:
-        void setScreen(std::string name) override
-        {
-            std::cout << "Set HiFi screen: " << name << "\n";
-            ht_.screen = std::move(name);
-        }
-
-        void setSound(std::string name) override
-        {
-            std::cout << "Set HiFi sound: " << name << "\n";
-            ht_.sound = std::move(name);
-        }
-
-        void setPlayer(std::string name) override
-        {
-            std::cout << "Set HiFi player: " << name << "\n";
-            ht_.player = std::move(name);
-        }
-};
-
-class HiEndBuilder: public Builder {
-    public:
-        void setScreen(std::string name) override
-        {
-            std::cout << "Set HiEnd screen: " << name << "\n";
-            ht_.screen = std::move(name);
-        }
-
-        void setSound(std::string name) override
-        {
-            std::cout << "Set HiEnd sound: " << name << "\n";
-            ht_.sound = std::move(name);
-        }
-
-        void setPlayer(std::string name) override
-        {
-            std::cout << "Set HiEnd player: " << name << "\n";
-            ht_.player = std::move(name);
-        }
-};
-
 int main() {
-  std::shared_ptr<Builder> b{new HiFiBuilder{}};
-  Setter s{b};
-  auto hometheater = s.create("SONY", "AudioPro", "Technosonic");
+    auto engineer = std::make_shared<BlueprintBuilder>();
+    Director{engineer}.make();
+    auto blueprint = engineer.get();
+
+    auto builder = std::make_shared<CinemaBuilder>();
+    Director{builder}.make();
+    auto cinema = builder.get();
 }
