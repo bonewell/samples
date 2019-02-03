@@ -1,28 +1,30 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <memory>
 
 class Address {
     public:
         virtual std::string get() const = 0;
         virtual ~Address() = default;
 };
+using AddressPtr = std::unique_ptr<Address>;
 
 class CompositeAddress: public Address {
     public:
-        CompositeAddress& add(const Address& item) {
-            items_.push_back(&item);
+        CompositeAddress& add(AddressPtr item) {
+            items_.push_back(std::move(item));
             return *this;
         }
         std::string get() const {
             std::string res;
-            for (const auto i: items_) {
+            for (const auto& i: items_) {
                 res += i->get() + " ";
             }
             return res;
         }
     private:
-        std::vector<const Address*> items_;
+        std::vector<AddressPtr> items_;
 };
 
 std::ostream& operator<<(std::ostream& out, const Address& address) {
@@ -54,10 +56,9 @@ class Block: public CompositeAddress {
 
 int main() {
     Block b{"539"};
-    Flat f1{"1"};
-    Flat f2{"2"};
-    Flat f3{"3"};
-    b.add(f1).add(f2).add(f3);
+    b.add(std::make_unique<Flat>("1"))
+      .add(std::make_unique<Flat>("2"))
+      .add(std::make_unique<Flat>("3"));
 
     std::cout << b << "\n";
 }

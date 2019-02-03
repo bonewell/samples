@@ -1,8 +1,6 @@
 #include <iostream>
 #include <memory>
 
-enum class Type { kFile, kGrab };
-
 enum class Kind { kAudio, kVideo };
 
 class StreamImpl {
@@ -12,6 +10,7 @@ class StreamImpl {
         virtual Kind kind() = 0;
         virtual ~StreamImpl() = default;
 };
+using StreamImplPtr = std::unique_ptr<StreamImpl>;
 
 class FileStream: public StreamImpl {
     public:
@@ -45,30 +44,15 @@ class GrabberStream: public StreamImpl {
 
 class Stream {
     public:
-        explicit Stream(Type type) {
-            switch (type) {
-                case Type::kFile:
-                    impl_ = std::make_unique<FileStream>();
-                    break;
-                case Type::kGrab:
-                    impl_ = std::make_unique<GrabberStream>();
-            }
-        }
-
-        virtual bool start() {
-            return impl_->open();
-        }
-
-        virtual void stop() {
-            impl_->close();
-        }
-    protected:
-        std::unique_ptr<StreamImpl> impl_;
+        virtual bool start() = 0;
+        virtual void stop() = 0;
+        virtual ~Stream() = default;
 };
 
 class AudioStream: public Stream {
     public:
-        explicit AudioStream(Type type): Stream(type) {}
+        explicit AudioStream(StreamImplPtr stream):
+            impl_{std::move(stream)} {}
 
         bool start() override {
             if (impl_->open()) {
@@ -80,11 +64,14 @@ class AudioStream: public Stream {
             }
             return false;
         }
+    private:
+        StreamImplPtr impl_;
 };
 
 class VideoStream: public Stream {
-        public:
-        explicit VideoStream(Type type): Stream(type) {}
+    public:
+        explicit VideoStream(StreamImplPtr stream):
+            impl_{std::move(stream)} {}
 
         bool start() override {
             if (impl_->open()) {
@@ -96,11 +83,13 @@ class VideoStream: public Stream {
             }
             return false;
         }
+    private:
+        StreamImplPtr impl_;
 };
 
 int main() {
-    AudioStream audio(Type::kFile);
-    VideoStream video(Type::kGrab);
+    AudioStream audio{std::make_unique<FileStream>()};
+    VideoStream video{std::make_unique<GrabberStream>()};
     std::pair<Stream&, Stream&> stream{audio, video};
 
     std::cout << std::boolalpha << stream.first.start() << "\n";

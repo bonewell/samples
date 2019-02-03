@@ -6,6 +6,7 @@ class Kpp {
         virtual bool open(std::string id) = 0;
         virtual ~Kpp() = default;
 };
+using KppPtr = std::shared_ptr<Kpp>;
 
 class Schlagbaum: public Kpp {
     bool open(std::string id) override {
@@ -16,7 +17,7 @@ class Schlagbaum: public Kpp {
 
 class FrontierGuard: public Kpp {
     public:
-        FrontierGuard(std::unique_ptr<Kpp> kpp):
+        FrontierGuard(KppPtr kpp):
             kpp_{std::move(kpp)} {
         }
         bool open(std::string id) override {
@@ -27,10 +28,10 @@ class FrontierGuard: public Kpp {
             return false;
         }
     private:
-        std::unique_ptr<Kpp> kpp_;
+        KppPtr kpp_;
 };
 
 int main() {
-    FrontierGuard guard{std::make_unique<Schlagbaum>()};
+    FrontierGuard guard{std::make_shared<Schlagbaum>()};
     guard.open("president");
 }

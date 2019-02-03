@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 
 struct Size {
     int width;
@@ -15,6 +16,7 @@ class Canvas {
         virtual void size(Size size) = 0;
         virtual ~Canvas() = default;
 };
+using CanvasPtr = std::unique_ptr<Canvas>;
 
 class Image: public Canvas {
     public:
@@ -34,26 +36,26 @@ class Image: public Canvas {
 
 class Transformation: public Canvas {
     public:
-        Transformation(Canvas& canvas):
-            canvas_{canvas} {}
+        Transformation(CanvasPtr canvas):
+            canvas_{std::move(canvas)} {}
         void draw() override {
-            canvas_.draw();
+            canvas_->draw();
         }
     protected:
         Size size() override {
-            return canvas_.size();
+            return canvas_->size();
         }
         void size(Size size) override {
-            canvas_.size(size);
+            canvas_->size(size);
         }
     private:
-        Canvas& canvas_;
+        CanvasPtr canvas_;
 };
 
 class Rotation: public Transformation {
     public:
-        Rotation(Canvas& canvas, int angle):
-            Transformation(canvas),
+        Rotation(CanvasPtr canvas, int angle):
+            Transformation{std::move(canvas)},
             angle_{angle} {}
         void draw() override {
             std::cout << "rotate image " << angle_ << "\n";
@@ -66,12 +68,12 @@ class Rotation: public Transformation {
 };
 
 int main() {
-    Image i{{25, 62}};
-    i.draw();
+    CanvasPtr c = std::make_unique<Image>(Size{25, 62});
+    c->draw();
 
-    Rotation r{i, 90};
-    Canvas& c = r;
-    c.draw();
-    Rotation rr{r, 90};
-    rr.draw();
+    c = std::make_unique<Rotation>(std::move(c), 90);
+    c->draw();
+
+    c = std::make_unique<Rotation>(std::move(c), 90);
+    c->draw();
 }

@@ -1,12 +1,10 @@
 #include <string>
 #include <iostream>
 
-using namespace std;
-
 // imagine it is not possible to change
 class DeltaApi {
     public:
-        int find(const string& name) {
+        int find(const std::string& name) {
             return 2;
         }
         int balance(int id) {
@@ -15,19 +13,19 @@ class DeltaApi {
 };
 
 struct Account {
-    string name;
+    std::string name;
     int money;
 };
 
 class Bank {
     public:
-        virtual Account account(string name) = 0;
+        virtual Account account(std::string name) = 0;
         ~Bank() = default;
 };
 
 class DeltaBank: public Bank {
     public:
-        Account account(string name) override {
+        Account account(std::string name) override {
             Account acc;
             auto id = api_.find(name);
             if (id > 0) {
@@ -44,5 +42,5 @@ int main() {
     DeltaBank delta;
     Bank& b = delta;
     auto a = b.account("My Name");
-    cout << a.name << ": " << a.money << "\n";
+    std::cout << a.name << ": " << a.money << "\n";
 }
