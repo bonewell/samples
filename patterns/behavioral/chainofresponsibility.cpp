@@ -4,32 +4,38 @@
 
 using Cash = std::vector<int>;
 
-class NoMoney: public std::exception {
+class NoMoney: public std::exception {};
+
+class CashCatridge;
+using CashCatridgePtr = std::unique_ptr<CashCatridge>;
+
+class ATM {
+    public:
+        virtual void add(CashCatridgePtr catridge) = 0;
+        virtual Cash withdraw(int amount) = 0;
+        virtual ~ATM() = default;
 };
 
-class CashCatridge {
+class CashCatridge: public ATM {
     public:
         CashCatridge(int count): count_{count} {}
-        CashCatridge& add(CashCatridge* catridge) {
+        void add(CashCatridgePtr catridge) override {
             if (next_) {
-                next_->add(catridge);
+                next_->add(std::move(catridge));
             } else {
-                next_ = catridge;
+                next_ = std::move(catridge);
             }
-            return *this;
         }
-        virtual Cash withdraw(int amount) {
+        Cash withdraw(int amount) override {
             if (next_) {
                 return next_->withdraw(amount);
             }
             return {};
         }
-        virtual ~CashCatridge() = default;
     protected:
-        int count() { return count_; };
         Cash withdraw(int amount, int banknote) {
             int c = amount / banknote;
-            if (c > count()) {
+            if (c > count_) {
                 throw NoMoney{};
             }
             Cash res;
@@ -42,7 +48,7 @@ class CashCatridge {
         }
     private:
         int count_;
-        CashCatridge* next_;
+        CashCatridgePtr next_;
 };
 
 class Cash1000: public CashCatridge {
@@ -70,12 +76,11 @@ class Cash100: public CashCatridge {
 };
 
 int main() {
-    Cash1000 c1000(100);
-    Cash500 c500(1000);
-    Cash100 c100(5000);
-    c1000.add(&c500).add(&c100);
+    std::unique_ptr<ATM> atm = std::make_unique<Cash1000>(100);
+    atm->add(std::make_unique<Cash500>(1000));
+    atm->add(std::make_unique<Cash100>(5000));
 
-    auto cash = c1000.withdraw(2900);
+    auto cash = atm->withdraw(2900);
     for (const auto& c: cash) {
         std::cout << c << " ";
     }
