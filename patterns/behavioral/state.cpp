@@ -40,12 +40,7 @@ public:
     std::string run() override {
         return "Already running...";
     }
-    std::string stop() override {
-        // In order to build you have to separate code on few files
-        // to break circular dependencies
-        elevator_.changeState(std::make_unique<Idle>(elevator_));
-        return "Stopped.";
-    }
+    std::string stop() override;
     std::string repair() override {
         return "Not stopped.";
     }
@@ -96,6 +91,11 @@ public:
         return "Not broken!";
     }
 };
+
+std::string Running::stop() {
+    elevator_.changeState(std::make_unique<Idle>(elevator_));
+    return "Stopped.";
+}
 
 int main() {
     Elevator e1;
