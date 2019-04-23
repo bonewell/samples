@@ -1,0 +1,35 @@
+@startuml
+class udp_server {
+    - socket : socket
+    - remote_endpoint : endpoint
+    - recv_buffer : array
+    + udp_server(io_context)
+    - start_receive()
+    - handle_receive(error, size_t)
+    - handle_send(mesage, error, size_t)
+}
+note top of udp_server
+    udp_server(...) {
+        start_receive();
+    }
+end note
+note left of udp_server
+    start_receive() {
+        socket.async_receive_from(
+            buffer(recv_buffer),
+            remote_endpoint,
+            bind(&handle_receive, this,
+                error, bytes_transferred));
+    }
+end note
+note bottom of udp_server
+    handle_receive(...) {
+        shared_ptr<string> message;
+        socket.async_send_to(buffer(*message),
+            remote_endpoint,
+            bind(&handle_send, this, message,
+                error, bytes_transferred));
+        start_receive();
+    }
+end note
+@enduml
