@@ -2,14 +2,17 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <ios>
 #include <sstream>
 
 int main() {
-  std::ifstream ifs{"copystream.cpp"};
+  std::ifstream ifs{"copystream.cpp"};  // text file
+  // std::ifstream ifs{"copystream"};  // binary file
   std::stringstream ss;
-  std::copy(std::istream_iterator<uint8_t>{ifs},
-    std::istream_iterator<uint8_t>{},
-    std::ostream_iterator<uint8_t>{ss});
-  std::cout << ss.str() << "\n";
+  ifs >> std::noskipws;
+  std::copy(std::istream_iterator<char>{ifs},
+    std::istream_iterator<char>{},
+    std::ostream_iterator<char>{ss});
+  std::cout << ss.str();
   return 0;
 }
