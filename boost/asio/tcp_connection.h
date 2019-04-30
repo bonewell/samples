@@ -14,6 +14,7 @@ class TcpConnection : private std::enable_shared_from_this<TcpConnection> {
 
   private:
     explicit TcpConnection(boost::asio::io_context& io_context);
+    void handle_write(boost::system::error_code error, size_t size);
     tcp::socket socket_;
     std::string message_;
 };
