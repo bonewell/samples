@@ -3,13 +3,12 @@
 #include "tcp_connection.h"
 
 using boost::asio::ip::tcp;
-using boost::asio::ip::udp;
 
 class TcpConnection;
 
-class Server {
+class TcpServer {
   public:
-    explicit Server(boost::asio::io_context& io_context);
+    explicit TcpServer(boost::asio::io_context& io_context);
 
   private:
     void start_accept();

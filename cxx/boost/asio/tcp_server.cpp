@@ -1,33 +1,34 @@
-#include "server.h"
+#include "tcp_server.h"
 
 #include <iostream>
 
 using boost::asio::ip::tcp;
 
-Server::Server(boost::asio::io_context& io_context)
+TcpServer::TcpServer(boost::asio::io_context& io_context)
   : io_context_{io_context},
     acceptor_{io_context_, tcp::endpoint{tcp::v4(), 4545}}
 {
   start_accept();
 }
 
-void Server::start_accept()
+void TcpServer::start_accept()
 {
-  std::cout << "Start accept\n";
-  using namespace std::placeholders;
+  std::cout << "Tcp: start accept\n";
   auto new_conn = TcpConnection::create(io_context_);
   acceptor_.async_accept(new_conn->socket(),
-      [conn=new_conn, this](auto error) {
-          handle_accept(conn, error);
+      [new_conn, this](auto error) {
+        handle_accept(new_conn, error);
   });
 }
 
-void Server::handle_accept(TcpConnection::pointer new_conn,
+void TcpServer::handle_accept(TcpConnection::pointer new_conn,
                            const boost::system::error_code& error)
 {
-  std::cout << "accepted\n";
+  std::cout << "Tcp: accepted\n";
   if (!error) {
     new_conn->start();
+  } else {
+    std::cerr << "Tcp: accept error: " << error << "\n";
   }
   start_accept();
 }
