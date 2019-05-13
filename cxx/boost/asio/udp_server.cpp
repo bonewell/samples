@@ -5,8 +5,8 @@
 
 using boost::asio::ip::udp;
 
-UdpServer::UdpServer(boost::asio::io_context& io_context)
-  : socket_{io_context, udp::endpoint{udp::v4(), 4646}}
+UdpServer::UdpServer(boost::asio::io_context& io_context, unsigned short port)
+  : socket_{io_context, udp::endpoint{udp::v4(), port}}
 {
   start_receive();
 }

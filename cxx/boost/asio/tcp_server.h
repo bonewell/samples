@@ -8,7 +8,7 @@ class TcpConnection;
 
 class TcpServer {
   public:
-    explicit TcpServer(boost::asio::io_context& io_context);
+    TcpServer(boost::asio::io_context& io_context, unsigned short port);
 
   private:
     void start_accept();

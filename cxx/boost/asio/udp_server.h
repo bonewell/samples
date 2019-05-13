@@ -8,7 +8,7 @@ class UdpConnection;
 
 class UdpServer {
   public:
-    explicit UdpServer(boost::asio::io_context& io_context);
+    UdpServer(boost::asio::io_context& io_context, unsigned short port);
 
   private:
     void start_receive();

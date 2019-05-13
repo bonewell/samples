@@ -4,9 +4,9 @@
 
 using boost::asio::ip::tcp;
 
-TcpServer::TcpServer(boost::asio::io_context& io_context)
+TcpServer::TcpServer(boost::asio::io_context& io_context, unsigned short port)
   : io_context_{io_context},
-    acceptor_{io_context_, tcp::endpoint{tcp::v4(), 4545}}
+    acceptor_{io_context_, tcp::endpoint{tcp::v4(), port}}
 {
   start_accept();
 }

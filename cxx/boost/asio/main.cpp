@@ -9,8 +9,8 @@ using namespace std::literals;
 int main(int argc, char* argv[])
 try {
   boost::asio::io_context io_context;
-  TcpServer tcp_server{io_context};
-  UdpServer udp_server{io_context};
+  TcpServer tcp_server{io_context, 4545};
+  UdpServer udp_server{io_context, 4545};
   std::cout << "Run\n";
   io_context.run();
   return 0;
