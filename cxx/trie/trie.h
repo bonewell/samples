@@ -13,14 +13,12 @@ struct Node {
   using Children = std::unordered_map<std::string, Node*>;
   Children children;
 
+  void Insert(const std::string& key, const Data* data);
   ~Node() noexcept;
 };
 
-struct Trie {
+struct Trie : public Node {
   void Insert(const std::string& key, const Data* data = nullptr);
-  ~Trie() noexcept;
-
-  Node::Children children;
 };
 
 #endif  // TRIE_H

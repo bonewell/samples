@@ -7,14 +7,14 @@ using ::testing::Contains;
 using ::testing::Eq;
 using ::testing::Key;
 
-TEST(TestTrie, InsertIntoEmptyTree) {
+TEST(TrieTest, InsertIntoEmptyTree) {
   Trie tree;
   tree.Insert("One");
 
   EXPECT_THAT(tree.children, Contains(Key("One")));
 }
 
-TEST(TestTrie, InsertTwoDifferentElements) {
+TEST(TrieTest, InsertTwoDifferentElements) {
   Trie tree;
   tree.Insert("One");
   tree.Insert("Two");
@@ -23,7 +23,7 @@ TEST(TestTrie, InsertTwoDifferentElements) {
   EXPECT_THAT(tree.children, Contains(Key("Two")));
 }
 
-TEST(TestTrie, InsertWhenBeginOfKeyExists) {
+TEST(TrieTest, InsertWhenBeginOfKeyExists) {
   Trie tree;
   tree.Insert("In");
   tree.Insert("Inside");
@@ -32,7 +32,7 @@ TEST(TestTrie, InsertWhenBeginOfKeyExists) {
   EXPECT_THAT(tree.children.at("In")->children, Contains(Key("side")));
 }
 
-TEST(TestTrie, InsertTwoSimilarElements) {
+TEST(TrieTest, InsertTwoSimilarElements) {
   Trie tree;
   tree.Insert("One");
   tree.Insert("Once");
@@ -42,7 +42,7 @@ TEST(TestTrie, InsertTwoSimilarElements) {
   EXPECT_THAT(tree.children.at("On")->children, Contains(Key("ce")));
 }
 
-TEST(TestTrie, InsertElementWithData) {
+TEST(TrieTest, InsertElementWithData) {
   Trie tree;
   auto data = new Data{};
   tree.Insert("Data", data);
@@ -51,7 +51,7 @@ TEST(TestTrie, InsertElementWithData) {
   EXPECT_THAT(tree.children.at("Data")->data, Eq(data));
 }
 
-TEST(TestTrie, ElementInsertionSetsTrueMarker) {
+TEST(TrieTest, ElementInsertionSetsTrueMarker) {
   Trie tree;
   tree.Insert("One");
 
@@ -59,7 +59,7 @@ TEST(TestTrie, ElementInsertionSetsTrueMarker) {
   EXPECT_THAT(tree.children.at("One")->marker, Eq(true));
 }
 
-TEST(TestTrie, ElementInsertionSetsFalseMarker) {
+TEST(TrieTest, ElementInsertionSetsFalseMarker) {
   Trie tree;
   tree.Insert("One");
   tree.Insert("Once");
@@ -68,5 +68,25 @@ TEST(TestTrie, ElementInsertionSetsFalseMarker) {
   EXPECT_THAT(tree.children.at("On")->marker, Eq(false));
 }
 
-TEST(TestTrie, DISABLED_DeepInsertion) {
+TEST(TrieTest, DeepInsertion) {
+  Trie tree;
+  tree.Insert("Deep");
+  tree.Insert("Dead");
+  tree.Insert("Deepwater");
+
+  ASSERT_THAT(tree.children, Contains(Key("De")));
+  ASSERT_THAT(tree.children.at("De")->children, Contains(Key("ep")));
+  EXPECT_THAT(tree.children.at("De")->children.at("ep")->children, Contains(Key("water")));
+}
+
+TEST(TrieTest, DeepInsertionOfSimilarElement) {
+  Trie tree;
+  tree.Insert("Deep");
+  tree.Insert("Dead");
+  tree.Insert("Death");
+
+  ASSERT_THAT(tree.children, Contains(Key("De")));
+  ASSERT_THAT(tree.children.at("De")->children, Contains(Key("a")));
+  EXPECT_THAT(tree.children.at("De")->children.at("a")->children, Contains(Key("d")));
+  EXPECT_THAT(tree.children.at("De")->children.at("a")->children, Contains(Key("th")));
 }

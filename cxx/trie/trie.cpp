@@ -41,23 +41,22 @@ Node::~Node() noexcept {
     delete n;
 }
 
-Trie::~Trie() noexcept {
-  for (auto [_, n]: children)
-    delete n;
-}
-
-void Trie::Insert(const std::string& key, const Data* data) {
+void Node::Insert(const std::string& key, const Data* data) {
   auto [it, pos] = FindSimilar(children, key);
   if (it == std::end(children)) {
     AddElement(children, key, new Node{true, data, {}});
   } else if (it->first == key.substr(0, pos)) {
-    AddElement(it->second->children, key.substr(pos), new Node{true, data, {}});
+    it->second->Insert(key.substr(pos), data);
   } else {
     auto old_key = it->first;
     auto old_node = it->second;
     DeleteElement(children, it);
     auto nit = AddElement(children, old_key.substr(0, pos), new Node{false, nullptr, {}});
-    AddElement(nit->second->children, old_key.substr(pos), old_node);
     AddElement(nit->second->children, key.substr(pos), new Node{true, data, {}});
+    AddElement(nit->second->children, old_key.substr(pos), old_node);
   }
+}
+
+void Trie::Insert(const std::string& key, const Data* data) {
+  Node::Insert(key, data);
 }
