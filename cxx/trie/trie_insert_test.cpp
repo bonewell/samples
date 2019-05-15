@@ -77,6 +77,7 @@ TEST(TrieTest, DeepInsertion) {
   ASSERT_THAT(tree.children, Contains(Key("De")));
   ASSERT_THAT(tree.children.at("De")->children, Contains(Key("ep")));
   EXPECT_THAT(tree.children.at("De")->children.at("ep")->children, Contains(Key("water")));
+  EXPECT_THAT(tree.children.at("De")->children, Contains(Key("ad")));
 }
 
 TEST(TrieTest, DeepInsertionOfSimilarElement) {
@@ -89,4 +90,5 @@ TEST(TrieTest, DeepInsertionOfSimilarElement) {
   ASSERT_THAT(tree.children.at("De")->children, Contains(Key("a")));
   EXPECT_THAT(tree.children.at("De")->children.at("a")->children, Contains(Key("d")));
   EXPECT_THAT(tree.children.at("De")->children.at("a")->children, Contains(Key("th")));
+  EXPECT_THAT(tree.children.at("De")->children, Contains(Key("ep")));
 }

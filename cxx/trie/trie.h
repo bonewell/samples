@@ -1,6 +1,7 @@
 #ifndef TRIE_H
 #define TRIE_H
 
+#include <iostream>
 #include <string>
 #include <unordered_map>
 
@@ -20,5 +21,7 @@ struct Node {
 struct Trie : public Node {
   void Insert(const std::string& key, const Data* data = nullptr);
 };
+
+std::ostream& operator<<(std::ostream& out, const Trie& tree);
 
 #endif  // TRIE_H
