@@ -5,18 +5,28 @@
 #include <utility>
 
 namespace {
-size_t FindBegin(std::string key, std::string_view new_key) {
-  auto min = std::min(key.length(), new_key.length());
+/**
+ * Compares two strings and return position where is different found
+ * @param lhs the first string
+ * @param rhs the second string
+ * @return position where chars are not equal
+ * if strings are absolutely different, position is 0
+ * if strings are similar and one of them is just longer,
+ * position is std::min(lhs.length(), rhs.length())
+ *
+ */
+size_t Compare(std::string_view lhs, std::string_view rhs) {
+  auto min = std::min(lhs.length(), rhs.length());
   for (auto i = 0; i < min; ++i) {
-    if (key[i] != new_key[i]) return i;
+    if (lhs[i] != rhs[i]) return i;
   }
   return min;
 }
 
 std::pair<Node::Children::const_iterator, size_t>
-FindSimilar(const Node::Children& children, std::string_view key) {
+FindSimilarKey(const Node::Children& children, std::string_view key) {
   for (auto it = std::cbegin(children); it != std::cend(children); ++it) {
-    auto i = FindBegin(it->first, key);
+    auto i = Compare(it->first, key);
     if (i > 0) {
       return std::make_pair(it, i);
     }
@@ -25,7 +35,7 @@ FindSimilar(const Node::Children& children, std::string_view key) {
 }
 
 const Node* FindElement(const Node::Children& children, std::string_view key) {
-  const auto& [it, pos] = FindSimilar(children, key);
+  const auto& [it, pos] = FindSimilarKey(children, key);
   if (it != std::end(children)) {
     if (key == it->first) {
       return it->second;
@@ -68,7 +78,7 @@ void DeleteElement(Node::Children& children, Node::Children::const_iterator it) 
 }
 
 void RemoveElement(Node::Children& children, std::string_view key) {
-  const auto& [it, pos] = FindSimilar(children, key);
+  const auto& [it, pos] = FindSimilarKey(children, key);
   if (it != std::end(children)) {
     if (it->first == key) {
       DeleteElement(children, it);
@@ -96,7 +106,7 @@ Node::~Node() noexcept {
 }
 
 void Node::Insert(const std::string& key, const Data* data) {
-  const auto& [it, pos] = FindSimilar(children, key);
+  const auto& [it, pos] = FindSimilarKey(children, key);
   if (it == std::end(children)) {
     AddElement(children, key, new Node{true, data, {}});
   } else if (it->first == key.substr(0, pos)) {
