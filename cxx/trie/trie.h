@@ -14,13 +14,14 @@ struct Node {
   using Children = std::unordered_map<std::string, Node*>;
   Children children;
 
-  void Insert(const std::string& key, const Data* data);
+  void Insert(const std::string& key, const Data* data = nullptr);
+
+  using Result = std::pair<bool, const Data*>;
+  Result Find(const std::string& key) const;
   ~Node() noexcept;
 };
 
-struct Trie : public Node {
-  void Insert(const std::string& key, const Data* data = nullptr);
-};
+using Trie = Node;
 
 std::ostream& operator<<(std::ostream& out, const Trie& tree);
 

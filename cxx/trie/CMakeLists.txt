@@ -17,6 +17,7 @@ set(UNIT_TEST ${PROJECT_NAME}_unittest)
 add_executable(${UNIT_TEST}
   "trie.cpp"
   "trie_insert_test.cpp"
+  "trie_find_test.cpp"
 )
 target_compile_features(${UNIT_TEST} PRIVATE cxx_std_17)
 target_link_libraries(${UNIT_TEST}

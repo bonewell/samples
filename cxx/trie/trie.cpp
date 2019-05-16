@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <string_view>
+#include <utility>
 
 namespace {
 size_t FindBegin(std::string key, std::string_view new_key) {
@@ -21,6 +22,19 @@ FindSimilar(const Node::Children& children, std::string_view key) {
     }
   }
   return std::make_pair(std::end(children), 0u);
+}
+
+Node::Result FindElement(const Node::Children& children, std::string_view key) {
+  const auto& [it, pos] = FindSimilar(children, key);
+  if (it != std::end(children)) {
+    if (key == it->first) {
+      auto node = it->second;
+      return std::make_pair(node->marker, node->data);
+    } else {
+      return FindElement(it->second->children, key.substr(pos));
+    }
+  }
+  return std::make_pair(false, nullptr);
 }
 
 Node::Children::iterator AddElement(Node::Children& children, const std::string& key, Node* node) {
@@ -54,9 +68,7 @@ Node::~Node() noexcept {
 }
 
 void Node::Insert(const std::string& key, const Data* data) {
-  const auto res = FindSimilar(children, key);
-  const auto& it = res.first;
-  const auto& pos = res.second;
+  const auto& [it, pos] = FindSimilar(children, key);
   if (it == std::end(children)) {
     AddElement(children, key, new Node{true, data, {}});
   } else if (it->first == key.substr(0, pos)) {
@@ -71,8 +83,8 @@ void Node::Insert(const std::string& key, const Data* data) {
   }
 }
 
-void Trie::Insert(const std::string& key, const Data* data) {
-  Node::Insert(key, data);
+Node::Result Node::Find(const std::string& key) const {
+  return FindElement(children, key);
 }
 
 std::ostream& operator<<(std::ostream& out, const Trie& tree) {
