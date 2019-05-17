@@ -14,11 +14,11 @@ struct Node {
   using Children = std::unordered_map<std::string, Node*>;
   Children children;
 
-  void Insert(const std::string& key, const Data* data = nullptr);
+  void Insert(std::string_view key, const Data* data = nullptr);
   void Remove(const std::string& key);
 
   using Result = std::pair<bool, const Data*>;
-  Result Find(const std::string& key) const;
+  Result Find(std::string_view key) const;
   ~Node() noexcept;
 };
 

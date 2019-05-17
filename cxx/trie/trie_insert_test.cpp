@@ -92,3 +92,13 @@ TEST(TrieInsertTest, DeepInsertionOfSimilarElement) {
   EXPECT_THAT(tree.children.at("De")->children.at("a")->children, Contains(Key("th")));
   EXPECT_THAT(tree.children.at("De")->children, Contains(Key("ep")));
 }
+
+TEST(TrieInsertTest, InsertionIsJustMark) {
+  Trie tree;
+  tree.Insert("One");
+  tree.Insert("Once");
+  tree.Insert("On");
+
+  ASSERT_THAT(tree.children, Contains(Key("On")));
+  EXPECT_THAT(tree.children.at("On")->marker, Eq(true));
+}

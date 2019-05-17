@@ -1,6 +1,7 @@
 #include "trie.h"
 
 #include <algorithm>
+#include <iterator>
 #include <string_view>
 #include <utility>
 
@@ -26,9 +27,9 @@ size_t Compare(std::string_view lhs, std::string_view rhs) {
 std::pair<Node::Children::const_iterator, size_t>
 FindSimilarKey(const Node::Children& children, std::string_view key) {
   for (auto it = std::cbegin(children); it != std::cend(children); ++it) {
-    auto i = Compare(it->first, key);
-    if (i > 0) {
-      return std::make_pair(it, i);
+    auto pos = Compare(it->first, key);
+    if (pos > 0) {
+      return std::make_pair(it, pos);
     }
   }
   return std::make_pair(std::end(children), 0u);
@@ -36,17 +37,18 @@ FindSimilarKey(const Node::Children& children, std::string_view key) {
 
 const Node* FindElement(const Node::Children& children, std::string_view key) {
   const auto& [it, pos] = FindSimilarKey(children, key);
-  if (it != std::end(children)) {
-    if (key == it->first) {
+  if (pos > 0) {
+    if (it->first == key) {  // the same
       return it->second;
-    } else {
+    } else if (it->first == key.substr(0, pos)) {  // it->first is begin of key
       return FindElement(it->second->children, key.substr(pos));
     }
   }
   return nullptr;
 }
 
-Node::Children::iterator AddElement(Node::Children& children, const std::string& key, Node* node) {
+Node::Children::iterator AddChild(Node::Children& children,
+    std::string_view key, Node* node) {
   try {
     return children.emplace(key, node).first;
   } catch (...) {
@@ -70,7 +72,7 @@ void DeleteElement(Node::Children& children, Node::Children::const_iterator it) 
       auto new_key = it->first + it->second->children.begin()->first;
       auto node = it->second->children.begin()->second;
       DeleteChild(children, it);
-      AddElement(children, new_key, node);
+      AddChild(children, new_key, node);
     } else {
       it->second->marker = false;
     }
@@ -79,22 +81,18 @@ void DeleteElement(Node::Children& children, Node::Children::const_iterator it) 
 
 void RemoveElement(Node::Children& children, std::string_view key) {
   const auto& [it, pos] = FindSimilarKey(children, key);
-  if (it != std::end(children)) {
-    if (it->first == key) {
-      DeleteElement(children, it);
-    } else {
-      RemoveElement(it->second->children, key.substr(pos));
-    }
+  if (key.length() == pos) {
+    DeleteElement(children, it);
+  } else if (pos > 0) {
+    RemoveElement(it->second->children, key.substr(pos));
   }
 }
 
-std::ostream& PrintTree(std::ostream& out , const Node::Children& children, int deep) {
+std::ostream& PrintChildren(std::ostream& out , const Node::Children& children, int deep) {
   std::string prefix(deep, '-');
   for (const auto& p: children) {
     out << prefix << p.first << "\n";
-    if (!p.second->children.empty()) {
-      PrintTree(out, p.second->children, deep + 1);
-    }
+    PrintChildren(out, p.second->children, deep + 1);
   }
   return out;
 }
@@ -105,23 +103,25 @@ Node::~Node() noexcept {
                 [](const auto& c) { delete c.second; });
 }
 
-void Node::Insert(const std::string& key, const Data* data) {
+void Node::Insert(std::string_view key, const Data* data) {
   const auto& [it, pos] = FindSimilarKey(children, key);
-  if (it == std::end(children)) {
-    AddElement(children, key, new Node{true, data, {}});
-  } else if (it->first == key.substr(0, pos)) {
+  if (pos == 0) {
+    AddChild(children, key, new Node{true, data, {}});
+  } else if (key.length() == pos && !it->second->marker) {
+    it->second->marker = true;
+  } else if (it->first.length() == pos) {
     it->second->Insert(key.substr(pos), data);
   } else {
     auto old_key = it->first;
     auto old_node = it->second;
     DeleteChild(children, it);
-    auto nit = AddElement(children, old_key.substr(0, pos), new Node{false, nullptr, {}});
-    AddElement(nit->second->children, key.substr(pos), new Node{true, data, {}});
-    AddElement(nit->second->children, old_key.substr(pos), old_node);
+    auto nit = AddChild(children, old_key.substr(0, pos), new Node{false, nullptr, {}});
+    AddChild(nit->second->children, key.substr(pos), new Node{true, data, {}});
+    AddChild(nit->second->children, old_key.substr(pos), old_node);
   }
 }
 
-Node::Result Node::Find(const std::string& key) const {
+Node::Result Node::Find(std::string_view key) const {
   auto node = FindElement(children, key);
   if (node) {
     return std::make_pair(node->marker, node->data);
@@ -134,5 +134,5 @@ void Node::Remove(const std::string& key) {
 }
 
 std::ostream& operator<<(std::ostream& out, const Trie& tree) {
-  return PrintTree(out, tree.children, 0);
+  return PrintChildren(out, tree.children, 0);
 }

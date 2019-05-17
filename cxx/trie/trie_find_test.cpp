@@ -29,3 +29,17 @@ TEST(TrieFindTest, FindElementOnSecondLevel) {
 
   EXPECT_THAT(tree.Find("Once").first, Eq(true));
 }
+
+TEST(TrieFindTest, NoElementWithShortKey) {
+  Trie tree;
+  tree.children.emplace("Deepwater", new Node{true, nullptr, {}});
+
+  EXPECT_THAT(tree.Find("Deep").first, Eq(false));
+}
+
+TEST(TrieFindTest, NoElementWithLongKey) {
+  Trie tree;
+  tree.children.emplace("Deep", new Node{true, nullptr, {}});
+
+  EXPECT_THAT(tree.Find("Deepwater").first, Eq(false));
+}
