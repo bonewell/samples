@@ -29,10 +29,10 @@ FindSimilarKey(const Node::Children& children, std::string_view key) {
   for (auto it = std::cbegin(children); it != std::cend(children); ++it) {
     auto pos = Compare(it->first, key);
     if (pos > 0) {
-      return std::make_pair(it, pos);
+      return {it, pos};
     }
   }
-  return std::make_pair(std::end(children), 0u);
+  return {std::cend(children), 0u};
 }
 
 const Node* FindElement(const Node::Children& children, std::string_view key) {
@@ -47,32 +47,18 @@ const Node* FindElement(const Node::Children& children, std::string_view key) {
   return nullptr;
 }
 
-Node::Children::iterator AddChild(Node::Children& children,
-    std::string_view key, Node* node) {
-  try {
-    return children.emplace(key, node).first;
-  } catch (...) {
-    delete node;
-    throw;
-  }
-}
-
-void DeleteChild(Node::Children& children, Node::Children::const_iterator it) {
-  children.erase(it);
-}
-
 void DeleteElement(Node::Children& children, Node::Children::const_iterator it) {
   if (it->second->marker) {
     if (it->second->children.empty()) {
-      DeleteChild(children, it);
+//      DeleteChild(children, it);
       if (children.size() == 1) {
 //          Compress
       }
     } else if (it->second->children.size() == 1) {
       auto new_key = it->first + it->second->children.begin()->first;
       auto node = it->second->children.begin()->second;
-      DeleteChild(children, it);
-      AddChild(children, new_key, node);
+//      DeleteChild(children, it);
+//      AddChild(children, new_key, node);
     } else {
       it->second->marker = false;
     }
@@ -103,30 +89,58 @@ Node::~Node() noexcept {
                 [](const auto& c) { delete c.second; });
 }
 
-void Node::Insert(std::string_view key, const Data* data) {
+Node* Node::AddChild(const std::string& key, bool marker, const Data* data,
+    Node::Children&& children) {
+  auto node = new Node{marker, data, children};
+  try {
+    this->children.emplace(key, node);
+  } catch (...) {
+    delete node;
+    throw;
+  }
+  return node;
+}
+
+void Node::MoveChild(const std::string& key, Node* node) {
+  children.emplace(key, node);
+}
+
+void Node::MarkChild(const std::string& key, const Data* data) {
+  auto node = children[key];
+  node->marker = true;
+  node->data = data;
+}
+
+void Node::DeleteChild(const std::string& key) {
+  children.erase(key);
+}
+
+void Node::Insert(std::string key, const Data* data) {
   const auto& [it, pos] = FindSimilarKey(children, key);
   if (pos == 0) {
-    AddChild(children, key, new Node{true, data, {}});
-  } else if (key.length() == pos && !it->second->marker) {
-    it->second->marker = true;
-  } else if (it->first.length() == pos) {
+    AddChild(key, true, data);
+  } else if (it->first == key) {
+    MarkChild(it->first, data);
+  } else if (it->first == key.substr(0, pos)) {
     it->second->Insert(key.substr(pos), data);
+  } else if (it->first.substr(0, pos) == key) {
+    auto node = AddChild(key, true, data);
+    node->MoveChild(it->first.substr(pos), it->second);
+    DeleteChild(it->first);
   } else {
-    auto old_key = it->first;
-    auto old_node = it->second;
-    DeleteChild(children, it);
-    auto nit = AddChild(children, old_key.substr(0, pos), new Node{false, nullptr, {}});
-    AddChild(nit->second->children, key.substr(pos), new Node{true, data, {}});
-    AddChild(nit->second->children, old_key.substr(pos), old_node);
+    auto node = AddChild(it->first.substr(0, pos), false, nullptr);
+    node->AddChild(key.substr(pos), true, data);
+    node->MoveChild(it->first.substr(pos), it->second);
+    DeleteChild(it->first);
   }
 }
 
 Node::Result Node::Find(std::string_view key) const {
   auto node = FindElement(children, key);
   if (node) {
-    return std::make_pair(node->marker, node->data);
+    return {node->marker, node->data};
   }
-  return std::make_pair(false, nullptr);
+  return {false, nullptr};
 }
 
 void Node::Remove(const std::string& key) {

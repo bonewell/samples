@@ -8,7 +8,7 @@ using ::testing::Eq;
 using ::testing::Key;
 using ::testing::Not;
 
-TEST(TrieRemoveTest, RemoveElementFromFirstLevel) {
+TEST(TrieRemoveTest, DISABLED_RemoveElementFromFirstLevel) {
   Trie tree;
   tree.children.emplace("One", new Node{true, nullptr, {}});
 
@@ -16,7 +16,7 @@ TEST(TrieRemoveTest, RemoveElementFromFirstLevel) {
   EXPECT_THAT(tree.children.empty(), Eq(true));
 }
 
-TEST(TrieRemoveTest, NoElementToRemoveOnFirstLevel) {
+TEST(TrieRemoveTest, DISABLED_NoElementToRemoveOnFirstLevel) {
   Trie tree;
   tree.children.emplace("On", new Node{});
   tree.children.at("On")->children.emplace("e", new Node{true, nullptr, {}});
@@ -26,7 +26,7 @@ TEST(TrieRemoveTest, NoElementToRemoveOnFirstLevel) {
   EXPECT_THAT(tree.children, Contains(Key("On")));
 }
 
-TEST(TrieRemoveTest, UnmarkElementWithChildren) {
+TEST(TrieRemoveTest, DISABLED_UnmarkElementWithChildren) {
   Trie tree;
   tree.children.emplace("Deep", new Node{true, nullptr, {}});
   tree.children.at("Deep")->children.emplace("water", new Node{true, nullptr, {}});
@@ -37,7 +37,7 @@ TEST(TrieRemoveTest, UnmarkElementWithChildren) {
   EXPECT_THAT(tree.children.at("Deep")->marker, Eq(false));
 }
 
-TEST(TrieRemoveTest, RemoveParentAndCompressWithSingleChild) {
+TEST(TrieRemoveTest, DISABLED_RemoveParentAndCompressWithSingleChild) {
   Trie tree;
   tree.children.emplace("Deep", new Node{true, nullptr, {}});
   tree.children.at("Deep")->children.emplace("sea", new Node{true, nullptr, {}});
@@ -47,7 +47,7 @@ TEST(TrieRemoveTest, RemoveParentAndCompressWithSingleChild) {
   EXPECT_THAT(tree.children, Not(Contains(Key("Deep"))));
 }
 
-TEST(TrieRemoveTest, RemoveElementFromSecondLevel) {
+TEST(TrieRemoveTest, DISABLED_RemoveElementFromSecondLevel) {
   Trie tree;
   tree.children.emplace("On", new Node{});
   tree.children.at("On")->children.emplace("e", new Node{true, nullptr, {}});
