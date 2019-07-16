@@ -1,0 +1,42 @@
+//usr/bin/clang++ --std=c++17 "$0" && ./a.out; exit
+#include <string>
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+vector<vector<int>>* table;
+
+int common(const string& s1, const string& s2, int n1, int n2) {
+//     cout << "n1=" << n1 << ", n2=" << n2 << "\n";
+    if (n1 < 0 || n2 < 0) return 0;
+    if (s1[n1] == s2[n2]) {
+        if (table->at(n1).at(n2) == -1) {
+            table->at(n1).at(n2) = common(s1, s2, n1 - 1, n2 - 1) + 1;
+        }
+        return table->at(n1).at(n2);
+    }
+    if (table->at(n1).at(n2) == -1) {
+        table->at(n1).at(n2) = max(common(s1, s2, n1 - 1, n2), common(s1, s2, n1, n2 - 1));
+    }
+    return table->at(n1).at(n2);
+}
+
+// Complete the commonChild function below.
+int commonChild(string s1, string s2) {
+    vector<int> r(s1.length(), -1);
+    vector<vector<int>> t(s1.length(), r);
+    table = &t;
+    return common(s1, s2, s1.length() - 1, s2.length() - 1);
+}
+
+int main() {
+string s1 = "APMCTKBUKYRGZPAUVZEBVUXRGDVITOYXWQWRVCSXESMEHQLHPDJQWETAWQVSBRRNRRFDLFTRXOTKQHFTYAZSGBORDNAMUAJTPVOKERLVOLEALDQQLUDCUIRXJHQEZBRWYPFJXNTPELEZHNJILIZVZLYQJDFYSYQNRFFAOYXHQBQVRLFDIIOGWKQIZGVELYOUKZBKMHVYGIKIPSEMWSCWYOJTHOQKMLBAIZYNAKYNCXKDTTESODDAEAHKCDHCJYAHERACMLYQHXIRDFUSRTZDNVHSYFKCSPPYSLHOGIBTNUJTZQWVTHKUNDNWZADMATSUXEISCACQNQXIHNTXGCZUGIGBDONYTUXAXFINAYGZJVDCTZCWPGFNQDPERUCNJUXIFDSQHULYPZRNUOKMLMMQAJMLKCHJMEFJVRYZIPFQOBSDPAITHGMNKROCWJEGESCGOIUOQHOYUEQNPJPBMCNRZUHOSQNSUNCSTVQVWFGMUFJZGMEUVUPH";
+string s2 = "JUVSDRRSHFGSSLLLZEPJDVAWDPKQBKUHHOZFFXKQMGAACZUYOMNPHWGTYZWQGSMNYXWNFYNOIVVMPZXUNKJQYBYJINBOHXUWIVRTVLEKCOPDMTKTGDBWECDAVPMLHQLERZHDVZJZODPSAPGSRWJXNGFEBQBLTLNDIEGFHEGHJWFOIYXRUJMODSNXUFWBIJJMXTFMUKQEYPNBTZFEJNLDNWCGQLVUQUKGZHJOKZNPMUYEQLEYNNORKJQAMSTHTBCCPQTTCPRZATWNJQJXPODRXKIWDOFUBZVSDTAPFRMXJBJMUGVRZOCDUIPXVEGMRQNKXDKNWXMTNDJSETAKVSYMJISAREEJPLRABMXJSRQNASOJNEEVAMWCFJBCIOCKMHCMYCRCGYFNZKNALDUNPUSTSWGOYHOSWRHWSMFGZDWSBXWXGVKQPHGINRKMDXEVTNNZTBJPXYNAXLWZSBUMVMJXDIKORHBIBECJNKWJJJSRLYQIKKPXSNUT";
+
+    cout << commonChild("AA", "BB") << "\n";
+    cout << commonChild("HARRY", "SALLY") << "\n";
+    cout << commonChild("NOHARAAA", "SHINCHAN") << "\n";
+
+    cout << commonChild(s1, s2) << "\n";
+}
