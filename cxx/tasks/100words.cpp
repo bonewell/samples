@@ -41,4 +41,6 @@ int main() {
     for (const auto& w: out) {
         cout << w << "\n";
     }
+    unordered_map<int, int> m;
+    for (auto [k, v]: m) {}
 }
