@@ -1,5 +1,7 @@
 //usr/bin/g++ --std=c++17 "$0" && ./a.out; exit
-#include<bits/stdc++.h>
+#include <unordered_map>
+#include <unordered_set>
+#include <iostream>
 
 using namespace std;
 
@@ -34,33 +36,62 @@ bool is_overlay(const Workshops* p1, const Workshops* p2) {
         (p2->end_time <= p1->start_time));
 }
 
-int calc(vector<const Workshops*>& vec)
-{
-    unordered_map<int, int> count;
-    for (int i = 0; i < vec.size(); ++i) {
-        for (int j = 0; j < vec.size(); ++j) {
-            if (i != j) {
-                if (is_overlay(vec[i], vec[j])) count[i]++;
-            }
+void print(const unordered_map<int, unordered_set<int>>& ctrs) {
+    for (const auto& p: ctrs) {
+        cout << p.first << " -> ";
+        for (auto x: p.second) {
+            cout << x << ", ";
         }
+        cout << '\n';
     }
+}
+
+int calc(unordered_map<int, unordered_set<int>>& ctrs)
+{
     int res = 0;
-    auto maxi = max_element(begin(count), end(count),
-        [](const auto& p1, const auto& p2) {
-            return p1.second < p2.second;
-    });
-    if (maxi->second == 0) return vec.size();
-    vec.erase(begin(vec) + maxi->first);
-    return calc(vec);
+    while (ctrs.size() > 0) {
+//         print(ctrs);
+        auto maxi = max_element(begin(ctrs), end(ctrs),
+            [](const auto& p1, const auto& p2) {
+                return p1.second.size() < p2.second.size();
+            });
+        for (auto it = begin(ctrs); it != end(ctrs);) {
+            it->second.erase(maxi->first);
+            if (it->second.empty()) {
+                it = ctrs.erase(it);
+            }
+            else it++;
+        }
+        ctrs.erase(maxi);
+        res++;
+//         cout << "---\n";
+    }
+    return res;
 }
 
 int CalculateMaxWorkshops(Available_Workshops* ptr)
 {
-    vector<const Workshops*> vec;
+    unordered_map<int, unordered_set<int>> count;
     for (int i = 0; i < ptr->n; ++i) {
-        vec.push_back(&ptr->list[i]);
+        for (int j = 0; j < ptr->n; ++j) {
+            if (i != j) {
+                if (is_overlay(&ptr->list[i], &ptr->list[j])) {
+                    count[i].insert(j);
+                }
+            }
+        }
     }
-    return calc(vec);
+    return ptr->n - calc(count);
 }
 
 int main(int argc, char *argv[]) {
+    constexpr int n = 6; // number of workshops
+    // create arrays of unknown size n
+    int start_time[n] = {1, 3, 0, 5, 5, 8};
+    int duration[n] = {1, 1, 6, 2, 4, 1};
+
+    Available_Workshops * ptr;
+    ptr = initialize(start_time,duration, n);
+    cout << CalculateMaxWorkshops(ptr) << endl;
+    return 0;
+}
