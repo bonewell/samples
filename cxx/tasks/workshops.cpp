@@ -9,6 +9,8 @@ using namespace std;
 
 //Define the structs Workshops and Available_Workshops.
 struct Workshops {
+    Workshops() : start_time{0}, duration{0}, end_time{0} {}
+    Workshops(int s, int d, int e) : start_time{s}, duration{d}, end_time{e} {}
     int start_time;
     int duration;
     int end_time;
@@ -16,7 +18,7 @@ struct Workshops {
 
 struct Available_Workshops {
     int n;
-    Workshops* list;
+    vector<Workshops> list;
 };
 
 //Implement the functions initialize and CalculateMaxWorkshops
@@ -24,85 +26,26 @@ Available_Workshops* initialize(int start_time[], int duration[], int n)
 {
     Available_Workshops* ptr = new Available_Workshops();
     ptr->n = n;
-    ptr->list = new Workshops[n];
     for (int i = 0; i < n; ++i) {
-        ptr->list[i].start_time = start_time[i];
-        ptr->list[i].duration = duration[i];
-        ptr->list[i].end_time = start_time[i] + duration[i];
+        ptr->list.emplace_back(start_time[i], duration[i], start_time[i] + duration[i]);
     }
     return ptr;
 }
 
-bool is_overlay(const Workshops* p1, const Workshops* p2) {
-    return !((p1->end_time <= p2->start_time) ||
-        (p2->end_time <= p1->start_time));
-}
-
-bool find_overlay(const Workshops* w, const vector<const Workshops*>& ws) {
-    for (auto p: ws) {
-      if (is_overlay(w, p)) return true;
-    }
-    return false;
-}
-
-int calc_max(const Available_Workshops* ptr, vector<const Workshops*>& ws) {
-  for (int i = 0; i < ptr->n; ++i) {
-      if (!find_overlay(&ptr->list[i], ws)) {
-          ws.push_back(&ptr->list[i]);
-      }
-  }
-  return ws.size();
-}
-
-void print(const unordered_map<int, unordered_set<int>>& ctrs) {
-    for (const auto& p: ctrs) {
-        cout << p.first << " -> ";
-        for (auto x: p.second) {
-            cout << x << ", ";
-        }
-        cout << '\n';
-    }
-}
-
-int calc(unordered_map<int, unordered_set<int>>& ctrs)
-{
-    int res = 0;
-    while (ctrs.size() > 0) {
-//         print(ctrs);
-        auto maxi = max_element(begin(ctrs), end(ctrs),
-            [](const auto& p1, const auto& p2) {
-                return p1.second.size() < p2.second.size();
-            });
-        for (auto it = begin(ctrs); it != end(ctrs);) {
-            it->second.erase(maxi->first);
-            if (it->second.empty()) {
-                it = ctrs.erase(it);
-            }
-            else it++;
-        }
-        ctrs.erase(maxi);
-        res++;
-//         cout << "---\n";
-    }
-    return res;
-}
-
 int CalculateMaxWorkshops(Available_Workshops* ptr)
 {
-/*    unordered_map<int, unordered_set<int>> count;
-    for (int i = 0; i < ptr->n; ++i) {
-        for (int j = 0; j < ptr->n; ++j) {
-            if (i != j) {
-                if (is_overlay(&ptr->list[i], &ptr->list[j])) {
-                    count[i].insert(j);
-                }
-            }
+    sort(begin(ptr->list), end(ptr->list), [](const auto& w1, const auto& w2) {
+        return w1.end_time < w2.end_time;
+    });
+    int maxi = 0;
+    int curend = 0;
+    for (const auto& w: ptr->list) {
+        if (w.start_time >= curend) {
+            maxi++;
+            curend = w.end_time;
         }
     }
-    return ptr->n - calc(count);
-*/
-    vector<const Workshops*> ws;
-    return calc_max(ptr, ws);
+    return maxi;
 }
 
 int main(int argc, char *argv[]) {
