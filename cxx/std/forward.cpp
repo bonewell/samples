@@ -19,5 +19,7 @@ void f(int&& x) {
 int main() {
   int x = 5;
   invoke(fr, x);
+  // invoke(f, x); error no bind rvalue reference to lvalue
   invoke(f, move(x));
+  // invoke(fr, move(x)); error no bind lvalue reference to temporary
 }

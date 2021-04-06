@@ -3,6 +3,7 @@
 
 using namespace std;
 
+// A.h
 class A {
     protected:
         A() = default;
@@ -11,6 +12,7 @@ class A {
         }
     public:
         virtual void f() = 0;
+        virtual ~A() = default;
 
         template<class T>
         static unique_ptr<T> create() {
@@ -20,6 +22,7 @@ class A {
         }
 };
 
+// B.h and B.cpp
 class B: public A {
     public:
         void f() override {
@@ -28,6 +31,6 @@ class B: public A {
 };
 
 int main() {
-    auto b = B::create<B>();
+    auto b = A::create<B>();
     cout << typeid(b).name() << "\n";
 }
